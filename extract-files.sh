@@ -2,38 +2,42 @@
 
 set -e
 
-export VENDOR=samsung
-export DEVICE=j3xnlte
+VENDOR=samsung
+DEVICE=j3xnlte
 
-function extract() {
-    for FILE in `egrep -v '(^#|^$)' $1`; do
-        OLDIFS=$IFS IFS=":" PARSING_ARRAY=($FILE) IFS=$OLDIFS
-        FILE=`echo ${PARSING_ARRAY[0]} | sed -e "s/^-//g"`
-        DEST=${PARSING_ARRAY[1]}
-        if [ -z $DEST ]; then
-            DEST=$FILE
-        fi
-        DIR=`dirname $FILE`
-        if [ ! -d $2/$DIR ]; then
-            mkdir -p $2/$DIR
-        fi
-        # Try CM target first
-        adb pull /system/$DEST $2/$DEST
-        # if file does not exist try OEM target
-        if [ "$?" != "0" ]; then
-            adb pull /system/$FILE $2/$DEST
-        fi
-    done
-}
+# Load extractutils and do some sanity checks
+MY_DIR="${BASH_SOURCE%/*}"
+if [[ ! -d "$MY_DIR" ]]; then MY_DIR="$PWD"; fi
+
+LINEAGE_ROOT="$MY_DIR"/../../..
+
+HELPER="$LINEAGE_ROOT"/vendor/cm/build/tools/extract_utils.sh
+if [ ! -f "$HELPER" ]; then
+    echo "Unable to find helper script at $HELPER"
+    exit 1
+fi
+. "$HELPER"
 
 
-BASE=../../../vendor/$VENDOR/$DEVICE/proprietary
-rm -rf $BASE/*
+if [ $# -eq 0 ]; then
+    SRC=adb
+else
+    if [ $# -eq 1 ]; then
+        SRC=$1
+    else
+        echo "$0: bad number of arguments"
+        echo ""
+        echo "usage: $0 [PATH_TO_EXPANDED_ROM]"
+        echo ""
+        echo "If PATH_TO_EXPANDED_ROM is not specified, blobs will be extracted from"
+        echo "the device using adb pull."
+        exit 1
+    fi
+fi
 
-DEVBASE=../../../vendor/$VENDOR/$DEVICE/proprietary
-rm -rf $DEVBASE/*
+# Initialize the helper
+setup_vendor "$DEVICE" "$VENDOR" "$LINEAGE_ROOT"
 
-extract ../../$VENDOR/$DEVICE/proprietary-files.txt $DEVBASE
+extract "$MY_DIR"/proprietary-files.txt "$SRC"
 
-./../../$VENDOR/$DEVICE/setup-makefiles.sh
-
+"$MY_DIR"/setup-makefiles.sh
