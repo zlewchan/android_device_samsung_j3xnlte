@@ -1,0 +1,15 @@
+cc_library_static {
+    name: "libinit_j3xnlte",
+    recovery_available: true,
+    srcs: [
+        "init_j3xnlte.cpp",
+    ],
+    whole_static_libs: ["libbase"],
+    include_dirs: [
+        "system/core/include",
+        "system/core/init",
+    ],
+    shared_libs: [
+        "libbase",
+    ],
+}
