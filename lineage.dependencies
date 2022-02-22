@@ -1,7 +1,12 @@
 [
   {
-    "repository": "iamsj7/android_device_samsung_sharkls-common",
+    "repository": "zlewchan/android_device_samsung_sharkls-common",
     "target_path": "device/samsung/sharkls-common",
-    "revision": "cm-14.1"
+    "revision": "12"
+  },
+    {
+    "repository": "zlewchan/android_vendor_samsung_j3xlte",
+    "target_path": "vendor/samsung/j3xlte",
+    "revision": "12"
   }
 ]
